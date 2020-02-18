@@ -9,13 +9,12 @@ function App() {
     const res = await fetch('http://localhost:5000/checkout/getid', { method: 'POST'});
     const { paymentId } = await res.json()
     console.log('PaymentId is ', paymentId);
-    // eslint-disable-next-line no-undef
     
     console.log('checkoutKey', process.env.REACT_APP_CHECKOUT_KEY);
     const checkoutOptions = {
       checkoutKey: process.env.REACT_APP_CHECKOUT_KEY,
       paymentId: paymentId,
-      theme: { textColor: "blue" }
+      containerId:'dibs-complete-checkout',
     };
 
     // eslint-disable-next-line no-undef
@@ -32,23 +31,10 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        {/* Add entry point for DIBS checkout */}
-        <div id="dibs-complete-checkout" />
-        <button id="CreatePayment" onClick={createPayment}>Pay for stuff</button>
-
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>DIBS Easy demo</h1>
+      <button id="CreatePayment" onClick={createPayment}>Pay for stuff</button>
+      {/* Add entry point for DIBS checkout */}
+      <div id="dibs-complete-checkout" />
     </div>
   );
 }
