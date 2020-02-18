@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const path = require('path');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const fetch = require('node-fetch');
 
 dotenv.config();
@@ -8,13 +10,12 @@ dotenv.config();
 const server = express();
 const jsonParser = bodyParser.json();
 
-server.get('/', (req, res) => {
-  return res.send('Hello world');
-})
+
+if (process.env.NODE_ENV !== 'production') server.use(cors());
 
 // https://tech.dibspayment.com/easy/integration-guide
 
-server.get('/checkout/getid', jsonParser, async (req, res) => {
+server.post('/checkout/getid', jsonParser, async (req, res) => {
   // const order = req.body;
   const testOrder = {
     order: {
@@ -46,6 +47,7 @@ server.get('/checkout/getid', jsonParser, async (req, res) => {
         reference: "Demo Order"
         },
       checkout: {
+      integrationType: "EmbeddedCheckout",
       url: "http://localhost:3000/checkout",
       termsUrl: "https://localhost:3000/toc",
       shippingCountries:
@@ -77,4 +79,8 @@ server.get('/checkout/getid', jsonParser, async (req, res) => {
   res.send(paymentId);
 });
 
-server.listen(process.env.PORT, () => console.log(`server listening on ${process.env.PORT}`));
+server.get('*', (req, res) => {
+  return res.sendFile(path.join(__dirname, '/../build', 'index.html'));
+})
+
+server.listen(process.env.SERVER_PORT, () => console.log(`server listening on ${process.env.SERVER_PORT}`));
