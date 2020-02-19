@@ -5,7 +5,9 @@ import { useHistory } from 'react-router-dom';
 const Basket = () => {
     const history = useHistory();
     // const [checkout, setCheckout] = useState();
-    let checkout;
+    
+    // eslint-disable-next-line no-undef
+    // window.checkout1 = new Dibs.Checkout();
 
     const createPayment = async () => {
         const res = await fetch('http://localhost:5000/api/checkout/getid', { method: 'POST'});
@@ -21,16 +23,17 @@ const Basket = () => {
         };
     
         // eslint-disable-next-line no-undef
-        checkout = new Dibs.Checkout(checkoutOptions);
-    
-        checkout.on('payment-completed', (response) => {
-          console.log('checkout on payment-completed called');
-          // Response: paymentId: string (GUID without dashes)
-          history.push('/thankyou', { paymentId: response.paymentId });
-          // setCheckout(checkout);
-        });
+        globalShop.checkout = new Dibs.Checkout(checkoutOptions);
       }
-    
+
+    // eslint-disable-next-line no-undef
+    globalShop.checkout && globalShop.checkout.on('payment-completed', (response) => {
+      console.log('checkout on payment-completed called');
+      // Response: paymentId: string (GUID without dashes)
+      history.push('/thankyou', { paymentId: response.paymentId });
+      // setCheckout(checkout);
+    });
+
       return (
         <Container className="Basket">
           <h1>DIBS Easy demo</h1>
