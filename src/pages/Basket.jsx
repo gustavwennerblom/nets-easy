@@ -3,6 +3,8 @@ import { Container } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 
 const Basket = () => {
+    const [paymentId, setPaymentId] = useState();
+    
     const history = useHistory();
     const searchParams = new URLSearchParams(history.location.search)
     const paymentIdFromURL = searchParams.get('paymentId')
@@ -13,15 +15,21 @@ const Basket = () => {
       containerId:'dibs-complete-checkout',
     };
 
+    if(paymentIdFromURL && paymentIdFromURL !== paymentId) {
+      console.log(`Payment ID ${paymentIdFromURL} incoming in URL`);
+      setPaymentId(paymentIdFromURL)
+    }
+    
+    // TODO: Could be own hook?
     useEffect(() => {
-      if(paymentIdFromURL) {
-        console.log(`Payment ID ${paymentIdFromURL} incoming in URL`);
+      if(paymentId) {
+      
         // eslint-disable-next-line no-undef
-        const checkout = new Dibs.Checkout({...defaultCheckoutOptions, paymentId: paymentIdFromURL});
+        const checkout = new Dibs.Checkout({...defaultCheckoutOptions, paymentId: paymentId});
   
-        checkout.on('pay-initialized', (response) => {
-          console.log('checkout on pay-initialized called');
-        });
+        // checkout.on('pay-initialized', (response) => {
+        //   console.log('checkout on pay-initialized called');
+        // });
   
         checkout.on('payment-completed', (response) => {
           console.log('checkout on payment-completed called');
@@ -29,30 +37,14 @@ const Basket = () => {
           history.push('/thankyou', { paymentId: response.paymentId });
         });
       }
-    });
-    
+    });    
 
     const createPayment = async () => {
         const res = await fetch('http://localhost:5000/api/checkout/getid', { method: 'POST'});
-        const { paymentId } = await res.json()
-        console.log('PaymentId is ', paymentId);
-        
-        console.log('checkoutKey', process.env.REACT_APP_CHECKOUT_KEY);
-        const checkoutOptions = {
-          ...defaultCheckoutOptions,
-          paymentId: paymentId,          
-        };
-    
-        // eslint-disable-next-line no-undef
-        const checkout = new Dibs.Checkout(checkoutOptions);
-    
-        checkout.on('payment-completed', (response) => {
-          console.log('checkout on payment-completed called');
-          // Response: paymentId: string (GUID without dashes)
-          history.push('/thankyou', { paymentId: response.paymentId });
-          // setCheckout(checkout);
-        });
-      }
+        const { paymentId: newPaymentId } = await res.json()
+        console.log('New payment with created with id ', newPaymentId);
+        setPaymentId(newPaymentId);        
+    }
     
       return (
         <Container className="Basket">
