@@ -1,47 +1,41 @@
 import React, { useState } from 'react';
 import { Container } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import { useDibsCheckout } from '../hooks/useDibsCheckout';
 
 const Basket = () => {
-    const history = useHistory();
-    // const [checkout, setCheckout] = useState();
-    
-    // eslint-disable-next-line no-undef
-    // window.checkout1 = new Dibs.Checkout();
+  const [paymentId, setPaymentId] = useState();
 
-    const createPayment = async () => {
-        const res = await fetch('http://localhost:5000/api/checkout/getid', { method: 'POST'});
-        const { paymentId } = await res.json()
-        console.log('PaymentId is ', paymentId);
-        
-        console.log('checkoutKey', process.env.REACT_APP_CHECKOUT_KEY);
-        const checkoutOptions = {
-          checkoutKey: process.env.REACT_APP_CHECKOUT_KEY,
-          paymentId: paymentId,
-          language: 'sv-SE',
-          containerId:'dibs-complete-checkout',
-        };
-    
-        // eslint-disable-next-line no-undef
-        globalShop.checkout = new Dibs.Checkout(checkoutOptions);
-      }
+  const history = useHistory();
+  const searchParams = new URLSearchParams(history.location.search);
+  const paymentIdFromURL = searchParams.get('paymentId');
 
-    // eslint-disable-next-line no-undef
-    globalShop.checkout && globalShop.checkout.on('payment-completed', (response) => {
-      console.log('checkout on payment-completed called');
-      // Response: paymentId: string (GUID without dashes)
-      history.push('/thankyou', { paymentId: response.paymentId });
-      // setCheckout(checkout);
+  if (paymentIdFromURL && paymentIdFromURL !== paymentId) {
+    console.log(`Payment ID ${paymentIdFromURL} incoming in URL`);
+    setPaymentId(paymentIdFromURL);
+  }
+
+  useDibsCheckout(paymentId, history);
+
+  const createPayment = async () => {
+    const res = await fetch('http://localhost:5000/api/checkout/getid', {
+      method: 'POST',
     });
+    const { paymentId: newPaymentId } = await res.json();
+    console.log('New payment with created with id ', newPaymentId);
+    setPaymentId(newPaymentId);
+  };
 
-      return (
-        <Container className="Basket">
-          <h1>DIBS Easy demo</h1>
-          <button id="CreatePayment" onClick={createPayment}>Pay for stuff</button>
-          {/* Add entry point for DIBS checkout */}
-          <div id="dibs-complete-checkout" />
-        </Container>
-      );
+  return (
+    <Container className="Basket">
+      <h1>DIBS Easy demo</h1>
+      <button id="CreatePayment" onClick={createPayment}>
+        Pay for stuff
+      </button>
+      {/* Add entry point for DIBS checkout */}
+      <div id="dibs-complete-checkout" />
+    </Container>
+  );
 };
 
 export default Basket;
