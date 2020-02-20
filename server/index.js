@@ -4,12 +4,12 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const { config } = require('./klarna-config');
 
 dotenv.config();
 
 const server = express();
 const jsonParser = bodyParser.json();
-
 
 if (process.env.NODE_ENV !== 'production') server.use(cors());
 
@@ -73,6 +73,46 @@ server.post('/api/checkout/getid', jsonParser, async (req, res) => {
   console.log(paymentId);
   res.send(paymentId);
 });
+
+server.get('/api/klarna/checkout', async (req, res) => {
+  const authString = Buffer.from(`${process.env.KLARNA_UID}:${process.env.KLARNA_PASSWORD}`).toString('base64');
+  console.log(authString);
+
+  const klarnaResultStream = await fetch(`${process.env.KLARNA_BASE_URL}/checkout/v3/orders`, { 
+    method: 'POST',
+    headers: {
+      Authorization:`Basic ${authString}`,
+      "Content-Type": 'application/json',
+    },
+    body: JSON.stringify({
+      purchase_country: config.country,
+      purchase_currency: config.currency,
+      locale: config.language,
+      order_amount: 50000,
+      order_tax_amount: 10000,
+      order_lines: [
+        {
+          type: "digital",
+          reference: "19-402-SWE",
+          name: "Camera Travel Set",
+          quantity: 1,
+          quantity_unit: "pcs",
+          unit_price: 50000,
+          tax_rate: 2000,
+          total_amount: 50000,
+          total_discount_amount: 0,
+          total_tax_amount: 10000,
+          image_url: "http://merchant.com/logo.png"
+        }
+      ],
+    })
+  });
+
+  const klarnaResult = await klarnaResultStream.json();
+
+  res.send(klarnaResult);  
+})
+
 
 server.get('*', (req, res) => {
   return res.sendFile(path.join(__dirname, '/../build', 'index.html'));
