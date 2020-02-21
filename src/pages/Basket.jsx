@@ -18,6 +18,8 @@ const Basket = () => {
   useDibsCheckout(paymentId, history);
 
   const createDIBSPayment = async () => {
+    // clear any old DIBS content
+    document.getElementById('dibs-complete-checkout').innerHTML = '';
     const res = await fetch('http://localhost:5000/api/nets/checkout', {
       method: 'POST',
     });
@@ -33,8 +35,20 @@ const Basket = () => {
         method: 'POST',
       }
     );
-    const resJson = await res.json();
-    console.log(resJson);
+    const klarnaOrder = await res.json();
+    const klarnaHtmlSnippet = klarnaOrder.html_snippet;
+    const klarnaContainer = document.getElementById('klarna-checkout');
+    klarnaContainer.innerHTML = klarnaHtmlSnippet;
+    // Ensure script tags are evaluated
+    const scriptTags = klarnaContainer.getElementsByTagName('script');
+    for (let tag of scriptTags) {
+      const parentNode = tag.parentNode;
+      const newTag = document.createElement('script');
+      newTag.type = 'text/javascript';
+      newTag.text = tag.text;
+      parentNode.removeChild(tag);
+      parentNode.appendChild(newTag);
+    }
   };
 
   return (
@@ -49,6 +63,7 @@ const Basket = () => {
 
       {/* Add entry point for DIBS checkout */}
       <div id="dibs-complete-checkout" />
+      <div id="klarna-checkout" />
     </Container>
   );
 };
