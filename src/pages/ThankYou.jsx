@@ -1,11 +1,17 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 
 const ThankYou = () => {
   const location = useLocation();
-  const { paymentId } = location.state;
+  const match = useRouteMatch();
 
-  return <div>{`Thank you for your payment with id ${paymentId}`}</div>;
+  const { paymentId } = location?.state; // Only when using NETS
+
+  return (
+    <div>
+      {paymentId && `Thank you for your NETS payment with id ${paymentId}`}
+    </div>
+  );
 };
 
 export default ThankYou;

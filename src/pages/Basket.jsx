@@ -60,6 +60,12 @@ const Basket = () => {
       <Button variant="contained" color="primary" onClick={createKlarnaPayment}>
         Pay for stuff with Klarna
       </Button>
+      <a
+        href="https://developers.klarna.com/documentation/testing-environment/"
+        target="_blank"
+      >
+        Klarna test data
+      </a>
 
       {/* Add entry point for DIBS checkout */}
       <div id="dibs-complete-checkout" />
