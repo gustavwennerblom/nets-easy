@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container } from '@material-ui/core';
+import { Button, Container, Grid } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { useDibsCheckout } from '../hooks/useDibsCheckout';
 
@@ -17,8 +17,8 @@ const Basket = () => {
 
   useDibsCheckout(paymentId, history);
 
-  const createPayment = async () => {
-    const res = await fetch('http://localhost:5000/api/checkout/getid', {
+  const createDIBSPayment = async () => {
+    const res = await fetch('http://localhost:5000/api/nets/checkout', {
       method: 'POST',
     });
     const { paymentId: newPaymentId } = await res.json();
@@ -26,12 +26,27 @@ const Basket = () => {
     setPaymentId(newPaymentId);
   };
 
+  const createKlarnaPayment = async () => {
+    const res = await global.fetch(
+      'http://localhost:5000/api/klarna/checkout',
+      {
+        method: 'POST',
+      }
+    );
+    const resJson = await res.json();
+    console.log(resJson);
+  };
+
   return (
     <Container className="Basket">
       <h1>DIBS Easy demo</h1>
-      <button id="CreatePayment" onClick={createPayment}>
-        Pay for stuff
-      </button>
+      <Button variant="contained" color="primary" onClick={createDIBSPayment}>
+        Pay for stuff with Nets
+      </Button>
+      <Button variant="contained" color="primary" onClick={createKlarnaPayment}>
+        Pay for stuff with Klarna
+      </Button>
+
       {/* Add entry point for DIBS checkout */}
       <div id="dibs-complete-checkout" />
     </Container>
